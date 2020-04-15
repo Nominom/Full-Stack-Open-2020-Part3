@@ -1,0 +1,26 @@
+
+GET http://localhost:3001/api/persons/
+###
+DELETE http://localhost:3001/api/persons/3
+###
+POST http://localhost:3001/api/persons/
+content-type: application/json
+
+{
+    "name": "Kitty person",
+    "number": "000-1234567"
+}
+###
+POST http://localhost:3001/api/persons/
+content-type: application/json
+
+{
+    "name": "Dog person"
+}
+###
+POST http://localhost:3001/api/persons/
+content-type: application/json
+
+{
+    "number": "000-1234567"
+}

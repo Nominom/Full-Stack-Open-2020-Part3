@@ -1,0 +1,27 @@
+{
+  "name": "phonebook-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nominom/Full-Stack-Open-2020-Part3.git"
+  },
+  "author": "Nominom",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Nominom/Full-Stack-Open-2020-Part3/issues"
+  },
+  "homepage": "https://github.com/Nominom/Full-Stack-Open-2020-Part3#readme",
+  "devDependencies": {
+    "nodemon": "^2.0.3"
+  },
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
