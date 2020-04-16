@@ -46,36 +46,45 @@ app.delete('/api/persons/:id', (request, response, next) => {
 		.catch(error => next(error))
 })
 
-app.post('/api/persons', (request, response) => {
+app.post('/api/persons', (request, response, next) => {
 	const body = request.body
 
-	if (!body.name) {
-		return response.status(400).json({
-			error: 'name missing'
-		})
-	}
-	else if (!body.number) {
-		return response.status(400).json({
-			error: 'number missing'
-		})
-	}
-	Person.findOne({ 'name': body.name }).then(existing => {
-		
-		if (existing) {
-			return response.status(400).json({
-				error: 'name must be unique'
-			})
-		} else {
-			const person = new Person({
-				name: body.name,
-				number: body.number
-			})
+	const person = new Person({
+		name: body.name,
+		number: body.number
+	})
 
-			person.save().then(savedPerson => {
-				response.json(savedPerson.toJSON())
-			}).catch(error => next(error))
-		}
+	person.save().then(savedPerson => {
+		response.json(savedPerson.toJSON())
 	}).catch(error => next(error))
+
+	// if (!body.name) {
+	// 	return response.status(400).json({
+	// 		error: 'name missing'
+	// 	})
+	// }
+	// else if (!body.number) {
+	// 	return response.status(400).json({
+	// 		error: 'number missing'
+	// 	})
+	// }
+	// Person.findOne({ 'name': body.name }).then(existing => {
+
+	// 	if (existing) {
+	// 		return response.status(400).json({
+	// 			error: 'name must be unique'
+	// 		})
+	// 	} else {
+	// 		const person = new Person({
+	// 			name: body.name,
+	// 			number: body.number
+	// 		})
+
+	// 		person.save().then(savedPerson => {
+	// 			response.json(savedPerson.toJSON())
+	// 		}).catch(error => next(error))
+	// 	}
+	// }).catch(error => next(error))
 })
 
 app.put('/api/persons/:id', (request, response, next) => {
@@ -105,7 +114,10 @@ const errorHandler = (error, request, response, next) => {
 	console.error(error.message)
 	if (error.name === 'CastError') {
 		return response.status(400).send({ error: 'malformatted id' })
-	} else {
+	} else if (error.name === 'ValidationError') {
+		return response.status(400).json({ error: error.message })
+	}
+	else {
 		response.status(500).end()
 	}
 
