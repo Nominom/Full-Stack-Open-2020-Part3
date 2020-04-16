@@ -1,111 +1,80 @@
 require('dotenv').config()
 const express = require('express')
-const app = express()
-var morgan = require('morgan')
+const morgan = require('morgan')
 const cors = require('cors')
 const Person = require('./models/person')
 
+const app = express()
+
 app.use(cors())
 app.use(express.json())
-morgan.token('json', (req) => {
-	return JSON.stringify(req.body)
-})
+morgan.token('json', (req) => JSON.stringify(req.body))
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :json'))
 app.use(express.static('build'))
 
 app.get('/info', (req, res, next) => {
-	Person.find({}).then(persons => {
+	Person.find({}).then((persons) => {
 		res.send(`
 		<p>Phonebook has info for ${persons.length} people</p> 
 		<p>${new Date()}</p>`)
-	}).catch(error => next(error))
+	}).catch((error) => next(error))
 })
 
 app.get('/api/persons/:id', (request, response, next) => {
 	console.log(request.params.id)
-	Person.findById(request.params.id).then(person => {
+	Person.findById(request.params.id).then((person) => {
 		if (person) {
 			response.json(person.toJSON())
 		} else {
 			response.status(404).end()
 		}
-	}).catch(error => next(error))
+	}).catch((error) => next(error))
 })
 
 app.get('/api/persons', (req, res, next) => {
-	Person.find({}).then(persons => {
+	Person.find({}).then((persons) => {
 		res.json(persons)
-	}).catch(error => next(error))
+	}).catch((error) => next(error))
 })
 
 app.delete('/api/persons/:id', (request, response, next) => {
 	Person.findByIdAndRemove(request.params.id)
-		.then(result => {
+		.then(() => {
 			response.status(204).end()
 		})
-		.catch(error => next(error))
+		.catch((error) => next(error))
 })
 
 app.post('/api/persons', (request, response, next) => {
-	const body = request.body
+	const { body } = request
 
 	const person = new Person({
 		name: body.name,
-		number: body.number
+		number: body.number,
 	})
 
-	person.save().then(savedPerson => {
+	person.save().then((savedPerson) => {
 		response.json(savedPerson.toJSON())
-	}).catch(error => next(error))
-
-	// if (!body.name) {
-	// 	return response.status(400).json({
-	// 		error: 'name missing'
-	// 	})
-	// }
-	// else if (!body.number) {
-	// 	return response.status(400).json({
-	// 		error: 'number missing'
-	// 	})
-	// }
-	// Person.findOne({ 'name': body.name }).then(existing => {
-
-	// 	if (existing) {
-	// 		return response.status(400).json({
-	// 			error: 'name must be unique'
-	// 		})
-	// 	} else {
-	// 		const person = new Person({
-	// 			name: body.name,
-	// 			number: body.number
-	// 		})
-
-	// 		person.save().then(savedPerson => {
-	// 			response.json(savedPerson.toJSON())
-	// 		}).catch(error => next(error))
-	// 	}
-	// }).catch(error => next(error))
+	}).catch((error) => next(error))
 })
 
 app.put('/api/persons/:id', (request, response, next) => {
-	const body = request.body
+	const { body } = request
 
 	const person = {
 		name: body.name,
-		number: body.number
+		number: body.number,
 	}
 
 	Person.findByIdAndUpdate(request.params.id, person, { new: true, runValidators: true, context: 'query' })
-		.then(updatedPerson => {
-			if(updatedPerson){
-				response.json(updatedPerson.toJSON())
-			}else{
-				return response.status(404).json({error: 'Person does not exist.', kind:'missing'})
+		.then((updatedPerson) => {
+			if (updatedPerson) {
+				return response.json(updatedPerson.toJSON())
 			}
+			return response.status(404).json({ error: 'Person does not exist.', kind: 'missing' })
 		})
-		.catch(error => next(error))
+		.catch((error) => next(error))
 })
-
 
 
 const unknownEndpoint = (request, response) => {
@@ -117,16 +86,14 @@ app.use(unknownEndpoint)
 const errorHandler = (error, request, response, next) => {
 	console.error(error.message)
 	if (error.name === 'CastError') {
-		return response.status(400).send({ error: 'malformatted id', kind:'validation' })
-	} else if (error.name === 'ValidationError') {
+		return response.status(400).send({ error: 'malformatted id', kind: 'validation' })
+	} if (error.name === 'ValidationError') {
 		console.log(error)
-		return response.status(400).json({ error: error.message, kind:'validation' })
-	}
-	else {
-		response.status(500).end()
+		return response.status(400).json({ error: error.message, kind: 'validation' })
 	}
 
 	next(error)
+	return response.status(500).end()
 }
 
 app.use(errorHandler)
